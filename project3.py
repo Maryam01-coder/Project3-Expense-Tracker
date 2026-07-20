@@ -39,7 +39,7 @@ def add_expense():
         if amount < 0:
             print("Wrong Amount. Your amount spent must not be less then 0")
         else:
-            expense_id = len(expenses)
+            expense_id = len(expenses) + 1
 
             for expense in expenses:
                 if expense["title"] == e_title and expense["category"] == category and expense["amount"] == amount and expense["date"] == date:
