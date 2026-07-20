@@ -8,9 +8,9 @@ print("Welcome to your Expense Tracker.\n")
 details = []
 # Categories: (Food, Transport, Bills, Entertainment, etc.)
 
-def save_expense(filename, expense_details):
-    columns = ["title", "category", "amount", "date"]
-    with open(filename, "w", newline="") as detail:
+def save_expense(expense_details):
+    columns = ["id", "title", "category", "amount", "date"]
+    with open("expenses.csv", "w", newline="") as detail:
             content = csv.DictWriter(detail, fieldnames=columns)
 
             content.writeheader()
@@ -27,7 +27,9 @@ def load_expense(filename):
     except FileNotFoundError:
         print("The file needed does not exist")
 
-def add_expense(filename, expense_details):
+def add_expense():
+    expenses = load_expense("expenses.csv")
+
     e_title = input("Enter your expense title: ").capitalize().strip()
     category = input("What category is the expense? ").capitalize().strip()
     amount = float(input("How much was spent: "))
@@ -37,13 +39,25 @@ def add_expense(filename, expense_details):
         if amount < 0:
             print("Wrong Amount. Your amount spent must not be less then 0")
         else:
-            new_expense = {"title": e_title, "category": category, "amount": amount, "date": date}
-        expense_details.append(new_expense)
-        save_expense(filename, expense_details)
-        print("\nYour expense has been successfully added.")
+            expense_id = len(expenses)
+
+            for expense in expenses:
+                if expense["title"] == e_title and expense["category"] == category and expense["amount"] == amount and expense["date"] == date:
+                    print("The expense record has already been inputted.")
+                    return
+            new_expense = {
+                "id": expense_id,
+                "title": e_title, 
+                "category": category, 
+                "amount": amount, 
+                "date": date}
+            
+            expenses.append(new_expense)
+            save_expense(expenses)
+            print("\nYour expense has been successfully added.")
 
     except ValueError:
-        print("Kindly input the amount in decimal number.")
+        print("\nKindly input the amount in decimal number.")
 
     
 def view_expense(filename):
@@ -51,7 +65,7 @@ def view_expense(filename):
         expenses = load_expense(filename)
 
         print("-"*76)
-        print(f"|{'Index':<10}|{'Title':<15}|{'Category':<15}|{'Amount':<15}|{'Date':<15}|")
+        print(f"|{'ID':<10}|{'Title':<15}|{'Category':<15}|{'Amount':<15}|{'Date':<15}|")
         print("-"*76)
         if len(expenses) > 0:
             for index, expense in enumerate(expenses, start=1):
@@ -74,16 +88,17 @@ def calculate(filename):
     print(f"\nYour total expense is: {total_expense}")
 
 def delete(filename):
+    view_expense(filename)
     all_expenses = load_expense(filename)
-    del_title = input("Enter the expense title you want to delete: ").capitalize().strip()
+    del_title = int(input("Enter the number of the expense to delete: ").capitalize().strip())
 
-    for expense in all_expenses:
-        if expense["title"] == del_title:
-            all_expenses.remove(expense)
-            save_expense(filename, expense_details=all_expenses)
+    for index, expense in enumerate(all_expenses, start=1):
+        if del_title == index:
+            all_expenses.pop(index)
+            save_expense(all_expenses)
             print("The expense has been deleted successfully.")
             return
-    print("The expense inputted does not exit in the record. ")
+    print("The expense inputted does not exist in the record. ")
 
 def search(filename):
     cat = input("Enter the category of the expense you're searching for: ").capitalize().strip()
@@ -96,7 +111,7 @@ def search(filename):
 
         if same_cat:
             for each_cat in same_cat:
-                print(f"\nThe expense for the {each_cat['category']} category is ${each_cat['amount']} spent on {each_cat['date']}.")
+                print(f"\nThe expense for the {each_cat['category']} category: {each_cat['title']}, at ${each_cat['amount']} spent on {each_cat['date']}.")
         else:        
             print("\nThe expense you're searching does not exist in the record. ")
         
@@ -110,7 +125,7 @@ while True:
     "\n\nChoose any of the following('add','view','calculate','delete','search','exit): ").lower().strip()
 
     if ops == "add":
-        add_expense("expenses.csv", details)
+        add_expense()
     elif ops == "view":
         view_expense("expenses.csv")
     elif ops == "calculate":
