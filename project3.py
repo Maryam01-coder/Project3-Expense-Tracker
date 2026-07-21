@@ -70,6 +70,8 @@ def view_expense(filename):
         if len(expenses) > 0:
             for index, expense in enumerate(expenses, start=1):
                 print(f"|{index:<10}|{expense['title']:<15}|{expense['category']:<15}|{expense['amount']:<15}|{expense['date']:<15}|")
+        else:
+            print("There are no expense records.")
         print("-"*76)
             
     except FileNotFoundError: 
@@ -92,9 +94,10 @@ def delete(filename):
     all_expenses = load_expense(filename)
     del_title = int(input("Enter the number of the expense to delete: ").capitalize().strip())
 
-    for index, expense in enumerate(all_expenses, start=1):
+    for index in enumerate(all_expenses, start=1):
         if del_title == index:
-            all_expenses.pop(index)
+            new_index = index - 1 
+            all_expenses.pop(new_index)
             save_expense(all_expenses)
             print("The expense has been deleted successfully.")
             return
